@@ -1,0 +1,80 @@
+
+body {
+    margin: 0px;
+}
+
+.wizard {
+    display: inline-block;
+    width: 700px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 30px;
+    margin: 20px;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+.steps {
+    display: block;
+    width: 100%;
+}
+
+.tablist {
+    list-style: none;
+    padding: 0px;
+}
+
+.step-title {
+    width: 25%;
+    display: inline-block;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    background: #9dc8e2;
+    color: white;
+    overflow: hidden;
+}
+
+.step-title.current {
+    background: green;
+}
+
+.content {
+    padding: 10px;
+}
+
+.brand, .model, .fuel-type, .transmission-type {
+    user-select: none;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid black;
+}
+
+
+.brand.selected, .model.selected, .fuel-type.selected, .transmission-type.selected {
+    background: green;
+    color: white;
+}
+
+.next-action {
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background: green;
+    margin: 20px;
+    color: white;
+    width: 100px;
+    float: right;
+}
+
+.previous-action {
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    background: green;
+    color: white;
+    margin: 20px;
+    width: 100px;
+    float: left;
+}
