@@ -1,5 +1,5 @@
 const cars = {
-    brands: ['Audi', 'BMW', 'Ford', 'Honda', 'Hyundai', 'Kia'],
+    brands: ['Audi', 'BMW'],
     models: {
         'Audi': ['A4', 'A5', 'A6', 'R8', 'TT', 'V8'],
         'BMW': ['F25 X3', 'X6', 'F30 3 Series', 'I12 i8']
@@ -13,10 +13,11 @@ const cars = {
             'TT': ['Diesel', 'Electric'],
             'V8': ['Gas', 'Diesel'],
         },
-        bmw: {
-            bmw1: [
-                'test', 'test2'
-            ],
+        'BMW': {
+            'F25 X3': ['Diesel', 'Biofuel'],
+            'X6': ['Gas', 'Diesel'],
+            'F30 3 Series': ['Diesel', 'Electric'],
+            'I12 i8': ['Biofuel', 'Electric'],
         }
     },
     transmissionTypes: {
@@ -28,10 +29,11 @@ const cars = {
             'TT': ['Automatic Transmission', 'Automated Manual Transmission'],
             'V8': ['Manual Transmission', 'Automated Manual Transmission'],
         },
-        bmw: {
-            bmw1: [
-                'test', 'test2'
-            ],
-        }
+        'BMW': {
+            'F25 X3': ['Automatic Transmission', 'Manual Transmission'],
+            'X6': ['Automatic Transmission', 'Automated Manual Transmission'],
+            'F30 3 Series': ['Automatic Transmission', 'Automated Manual Transmission'],
+            'I12 i8': ['Manual Transmission', 'Automated Manual Transmission'],
+        },
     },
 }
