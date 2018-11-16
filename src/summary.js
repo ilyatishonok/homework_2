@@ -9,8 +9,8 @@ Summary.prototype.show = function(values) {
     const fuelTypeElement = this.element.querySelector('#car-fuel-type');
     const transmissionTypeElement = this.element.querySelector('#car-transmission-type');
 
-    brandElement.textContent = values[steps.CAR_BRAND_SELECT_STEP].brand;
-    modelElement.textContent = values[steps.CAR_MODEL_SELECT_STEP].model;
-    fuelTypeElement.textContent = values[steps.CAR_FUEL_TYPE_SELECT_STEP].fuelType;
-    transmissionTypeElement.textContent = values[steps.CAR_TRANSIMISSION_SELECT_STEP].transmissionType;
+    brandElement.textContent = `Brand: ${values[steps.CAR_BRAND_SELECT_STEP].brand}`;
+    modelElement.textContent = `Model: ${values[steps.CAR_MODEL_SELECT_STEP].model}`;
+    fuelTypeElement.textContent = `Fuel Type: ${values[steps.CAR_FUEL_TYPE_SELECT_STEP].fuelType}`;
+    transmissionTypeElement.textContent = `Transmission Type ${values[steps.CAR_TRANSIMISSION_SELECT_STEP].transmissionType}`;
 }

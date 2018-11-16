@@ -35,6 +35,11 @@ CarModelSelectStep.prototype._loadCarModels = function(provider) {
         modelElement.classList.add('model');
         modelElement.textContent = model;
 
+        if (model === this.values.model) {
+            this.currentModelElement = modelElement;
+            this.currentModelElement.classList.add('selected');
+        }
+
         this.modelsContainerElement.appendChild(modelElement);
     });
 }
@@ -48,7 +53,7 @@ CarModelSelectStep.prototype._addDefaultListeners =  function() {
                 if (this.currentModelElement) {
                     this.currentModelElement.classList.remove('selected');
                 }
-    
+
                 this.currentModelElement = target;
                 this.currentModelElement.classList.add('selected');
     
@@ -65,7 +70,8 @@ CarModelSelectStep.prototype.synchronizeWithWizard = function(mappedValues) {
     const { brand } = mappedValues;
 
     if (brand) {
-        if (!cars.models[brand].includes(this.values.model)) {
+        if (this.values.model && !cars.models[brand].includes(this.values.model)) {
+
             this.values = {
                 ...this.values,
                 model: null,

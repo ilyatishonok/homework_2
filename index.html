@@ -2,29 +2,29 @@
     <head>
         <title>Wizard Form</title>
         <link rel="stylesheet" type="text/css" href="./src/styles.css">
+        <link href="css/progress-wizard.min.css" rel="stylesheet">
     </head>
     <body>
         <div class="layout">
             <div class="wizard">
                 <section wizard-title="Brands" wizard-id="brand-step" wizard-step="true">
-                    <h3>Choose your Brand:</h3>
-                    <div class="brands">
-
-                    </div>
+                    <h3>Choose Brand:</h3>
+                    <div class="brands"></div>
                 </section>
                 <section wizard-title="Models" wizard-id="model-step" wizard-step="true">
-                    <h3>Choose your Model:</h3>
+                    <h3>Choose Model:</h3>
                     <div class="models"></div>
                 </section>
                 <section wizard-title="Fuel Types " wizard-id="fuel-type-step" wizard-step="true">
-                    <h3>Choose fuel type</h3>
+                    <h3>Choose Fuel Type</h3>
                     <div class="fuel-types"></div>
                 </section>
                 <section wizard-title="Transmission Types" wizard-id="transmission-type-step" wizard-step="true">
-                    <h3>Choose transmission</h3>
+                    <h3>Choose Transmission Type</h3>
                     <div class="transmission-types"></div>
                 </section>
-                <section wizard-summary="true">
+                <section class="wizard-summary" wizard-summary="true">
+                    <h2>Your order in process:</h2>
                     <div id="car-brand"></div>
                     <div id="car-model"></div>
                     <div id="car-fuel-type"></div>
@@ -32,6 +32,7 @@
                 </section>
             </div>
         </div>
+        <script src="src/helper.js"></script>
         <script src="src/data/cars.js"></script>
         <script src="src/steps.js"></script>
         <script src="src/step.js"></script>

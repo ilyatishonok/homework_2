@@ -19,6 +19,8 @@ Wizard.prototype.update = function(stepId) {
             ...this.values,
             [stepId]: step.getValues(),
         };
+
+        console.log(this.values);
         
         this.setNextButtonAvailability(step.isJumpToNextStepAllowed());
     }
@@ -29,46 +31,53 @@ Wizard.prototype.setNextButtonAvailability = function(isAvailable) {
         this.isNextButtonAvailable = isAvailable;
 
         this.nextActionElement.disabled = !isAvailable;
+        
+        isAvailable ? this.nextActionElement.classList.remove('disabled')
+            : this.nextActionElement.classList.add('disabled');
     }
 }
 
 Wizard.prototype.jumpToNextStep = function() {
-    //this.steps[this.currentStepStep].leaveFromStep();
-
     this.currentStep.hide();
 
     const currentStepIndex = this.steps.indexOf(this.currentStep);
+    const nextStepIndex = currentStepIndex + 1;
 
-    if ((currentStepIndex + 1) === this.steps.length) {
+    if (nextStepIndex === this.steps.length) {
         return this.showSummary();
     }
 
-    this.stepTitlesElement.firstChild.childNodes[currentStepIndex].classList.remove('current');
-    this.stepTitlesElement.firstChild.childNodes[currentStepIndex + 1].classList.add('current');
+    this.currentStep = this.steps[nextStepIndex];
+    this.stepTitleElement.textContent = this.currentStep.title;
 
-    const newStep = this.steps[currentStepIndex + 1];
-
-    const newMappings = newStep.mapWizardValues(this.values);
-    const isEqual = this._swallowCompare(newStep, newMappings);
-
-    if (isEqual) {
-        newStep.synchronizeWithWizard(newMappings);
-    }
+    this.processMappings();
+    this.currentStep.show();
 
     this.previousActionElement.style.display = 'block';
-    this.setNextButtonAvailability(newStep.isJumpToNextStepAllowed());
-    
-    this.currentStep = newStep;
-
-    newStep.show();
-
-    //this.steps[this.currentStep].afterStepDisplay();
+    this.setNextButtonAvailability(this.currentStep.isJumpToNextStepAllowed());
+    this.progressBarElement.style.width = `${(100 * nextStepIndex)/(this.steps.length)}%`;
 }
 
 Wizard.prototype.showSummary = function() {
-    this.stepTitlesElement.style.display = 'none';
+    this.progressBarElement.parentNode.style.display = 'none';
+    this.stepTitleElement.style.display = 'none';
     this.actionsElement.style.display = 'none';
     this.summary.show(this.values);
+}
+
+Wizard.prototype.processMappings = function() {
+    const { swallowCompare } = helper;
+
+    const newMappings = this.currentStep.mapWizardValues(this.values);
+    const mappings = this.stepMappings[this.currentStep.stepId];
+    
+    this.stepMappings[this.currentStep.stepId] = newMappings;
+
+    const isEqual = swallowCompare(mappings, newMappings);
+
+    if (!isEqual) {
+        this.currentStep.synchronizeWithWizard(newMappings);
+    }
 }
 
 Wizard.prototype.jumpToPreviousStep = function() {
@@ -80,14 +89,12 @@ Wizard.prototype.jumpToPreviousStep = function() {
 
     this.currentStep.hide();
 
-    this.stepTitlesElement.firstChild.childNodes[currentStepIndex].classList.remove('current');
-    this.stepTitlesElement.firstChild.childNodes[currentStepIndex - 1].classList.add('current');
-
     this.currentStep = this.steps[currentStepIndex - 1];
     const newStep = this.steps[currentStepIndex - 1];
     
     this.setNextButtonAvailability(newStep.isJumpToNextStepAllowed());
-
+    this.progressBarElement.style.width = `${100 * (currentStepIndex - 1)/this.steps.length}%`;
+    this.stepTitleElement.textContent = this.currentStep.title;
     if (currentStepIndex - 1 === 0) {
         this.previousActionElement.style.display = 'none';
     }
@@ -95,28 +102,20 @@ Wizard.prototype.jumpToPreviousStep = function() {
     newStep.show();
 }
 
-Wizard.prototype._findSummaryElement = function() {
-    return this.element.querySelector('[wizard-summary="true"');
-}
-
-Wizard.prototype._findStepsElements = function() {
-    return this.element.querySelectorAll('[wizard-step="true"]');
-}
-
 Wizard.prototype._reconstructDOM = function() {
-    const stepElements = this._findStepsElements();
-    const summaryElement = this._findSummaryElement();
+    const { findStepsElements, findSummaryElement, emptyElement } = helper;
 
-    while (this.element.firstChild) {
-        this.element.firstChild.remove();
-    }
+    const stepElements = findStepsElements(this.element);
+    const summaryElement = findSummaryElement(this.element);
+
+    emptyElement(this.element);
 
     const content = document.createElement('div');
     content.classList.add('content');
 
-    this._createStepTitlesDOM(stepElements);
     this._createSteps(stepElements);
-    this._setSummary(summaryElement);
+    this._createStepTitlesDOM(this.currentStep.title);
+    this._createSummary(summaryElement);
     this._createActionsDOM();
 
     this.setNextButtonAvailability(this.currentStep.isJumpToNextStepAllowed());
@@ -127,33 +126,16 @@ Wizard.prototype._reconstructDOM = function() {
 
     content.appendChild(this.summary.element);
 
-    this.element.appendChild(this.stepTitlesElement);
+    this.element.appendChild(this.stepTitleElement);
+    this.element.appendChild(this._createProgressBar());
     this.element.appendChild(content);
     this.element.appendChild(this.actionsElement);
 }
 
-Wizard.prototype._swallowCompare = function(object1, object2) {
-    return true;
-}
-
-Wizard.prototype._createStepTitlesDOM = function(stepElements) {
-    this.stepTitlesElement = document.createElement('div');
-    const tabListElement = document.createElement('ul');
-    this.stepTitlesElement.classList.add('steps');
-    tabListElement.classList.add('tablist');
-
-    const stepTitles = this._getStepTitles(stepElements);
-
-    stepTitles.forEach(stepTitle => {
-        const stepTitleElement = document.createElement('li');
-        stepTitleElement.textContent = stepTitle;
-        stepTitleElement.classList.add('step-title');
-        tabListElement.appendChild(stepTitleElement);
-    });
-
-    tabListElement.firstChild.classList.add('current');
-
-    this.stepTitlesElement.appendChild(tabListElement);
+Wizard.prototype._createStepTitlesDOM = function(stepTitle) {
+    this.stepTitleElement = document.createElement('div');
+    this.stepTitleElement.classList.add('step-title');
+    this.stepTitleElement.textContent = stepTitle;
 }
 
 Wizard.prototype._createActionsDOM = function() {
@@ -170,10 +152,10 @@ Wizard.prototype._createActionsDOM = function() {
     this.nextActionElement = nextActionElement
     this.previousActionElement = previousActionElement;
 
-    this.nextActionElement.addEventListener('click', event => {
-        //validate
-
-        this.jumpToNextStep();
+    this.nextActionElement.addEventListener('click', () => {
+        if (this.currentStep.validate()) {
+            this.jumpToNextStep();      
+        }
     })
 
     this.previousActionElement.addEventListener('click', event => {
@@ -187,6 +169,18 @@ Wizard.prototype._createActionsDOM = function() {
     this.actionsElement.appendChild(nextActionElement);
 }
 
+Wizard.prototype._createSummary = function(summaryElement) {
+    let summary = this.processSummary(summaryElement);
+
+    if (!(summary instanceof Summary)) {
+        summary = new Summary(summaryElement);
+    }
+
+    summary.element.style.display = 'none';
+
+    this.summary = summary;
+}
+
 Wizard.prototype._createSteps = function(stepElements) {
     this.steps = [];
 
@@ -194,38 +188,31 @@ Wizard.prototype._createSteps = function(stepElements) {
 
     stepElements.forEach(stepElement => {
         const wizardId = stepElement.getAttribute('wizard-id');
-        let step = this.processStep(stepElement, wizardId, update);
+        const wizardTitle = stepElement.getAttribute('wizard-title');
+        let step = this.processStep(stepElement, wizardId, wizardTitle, update);
 
         if (!(step instanceof Step)) {
-            step = new Step(stepElement, wizardId, update);
+            step = new Step(stepElement, wizardId, wizardTitle, update);
         }
 
-        step.element.style.display = 'none';
-
+        this.stepMappings[step.stepId] = Object.create(null);
         this.steps.push(step);
     });
     
     const [ firstStep ] = this.steps;
-    firstStep.show();
     this.currentStep = firstStep;
+
+    firstStep.show();
 }
 
-Wizard.prototype._getStepTitles = function(stepElements) {
-    const stepTitles = [];
+Wizard.prototype._createProgressBar = function() {
+    const progressElement = document.createElement('div');
+    progressElement.classList.add('progress');
 
-    stepElements.forEach(stepElement => {
-        stepTitles.push(stepElement.getAttribute('wizard-title'));
-    });
+    this.progressBarElement = document.createElement('div');
+    this.progressBarElement.classList.add('progress-bar');
 
-    return stepTitles;
-}
+    progressElement.appendChild(this.progressBarElement);
 
-Wizard.prototype._setSummary = function(summaryElement) {
-    let summary = this.processSummary(summaryElement);
-
-    if (!(summary instanceof Summary)) {
-        summary = new Summary(summaryElement);
-    }
-
-    this.summary = summary;
+    return progressElement;
 }

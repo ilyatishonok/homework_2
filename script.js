@@ -1,4 +1,4 @@
-const wizard = new Wizard(document.querySelector('.wizard'), (stepElement, stepId, update) => {
+const wizard = new Wizard(document.querySelector('.wizard'), (stepElement, stepId, title, update) => {
     const {
         CAR_MODEL_SELECT_STEP,
         CAR_BRAND_SELECT_STEP,
@@ -7,15 +7,15 @@ const wizard = new Wizard(document.querySelector('.wizard'), (stepElement, stepI
     } = steps;
     switch (stepId) {
         case CAR_MODEL_SELECT_STEP:
-            return new CarModelSelectStep(stepElement, stepId, update);
+            return new CarModelSelectStep(stepElement, stepId, title, update);
         case CAR_BRAND_SELECT_STEP:
-            return new CarBrandSelectStep(stepElement, stepId, update);
+            return new CarBrandSelectStep(stepElement, stepId, title, update);
         case CAR_FUEL_TYPE_SELECT_STEP:
-            return new CarFuelSelectStep(stepElement, stepId, update);
+            return new CarFuelSelectStep(stepElement, stepId, title, update);
         case CAR_TRANSIMISSION_SELECT_STEP: 
-            return new CarTransmissionSelectStep(stepElement, stepId, update);
+            return new CarTransmissionSelectStep(stepElement, stepId, title, update);
         default:
-            return new Step(stepElement, stepId, update);
+            return new Step(stepElement, stepId, title, update);
     }
 }, element => {
     return new Summary(element);

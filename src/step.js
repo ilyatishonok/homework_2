@@ -1,7 +1,10 @@
-function Step(element, stepId, update) {
+function Step(element, stepId, title, update) {
     let values = Object.create(null);
     this.element = element;
     this.stepId = stepId;
+    this.title = title;
+
+    this.element.style.display = 'none';
 
     Object.defineProperty(this, 'values', {
         get() {
@@ -24,7 +27,7 @@ Step.prototype.isJumpToNextStepAllowed = function() {
 }
 
 Step.prototype.mapWizardValues = function(wizardValues) {
-    return true;
+    return {};
 }
 
 Step.prototype.validate = function() {
