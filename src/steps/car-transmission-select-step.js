@@ -23,25 +23,26 @@ CarTransmissionSelectStep.prototype.isJumpToNextStepAllowed = function() {
 
 CarTransmissionSelectStep.prototype.synchronizeWithWizard = function(mappedValues) {
     const { model, brand } = mappedValues;
+    const { emptyElement } = helper;
 
     let provider = [];
 
     if (model && brand) {
         provider = cars.transmissionTypes[brand][model];
+        const { transmissionType } = this.values;
 
-        if (!provider.includes(this.values.transmissionType)) {
+        if (transmissionType && !provider.includes(transmissionType)) {
             this.values = {
                 ...this.values,
                 transmissionType: null,
             };
         }
 
-        while (this.transmissionTypesContainerElement.firstChild) {
-            this.transmissionTypesContainerElement.removeChild(this.transmissionTypesContainerElement.firstChild);
-        }
+        emptyElement(this.transmissionTypesContainerElement);
+        
     }
 
-    this._renderTransmissionTypes(provider)
+    this._renderTransmissionTypes(provider);
 }
 
 CarTransmissionSelectStep.prototype._renderTransmissionTypes = function(provider) {

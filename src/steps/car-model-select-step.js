@@ -35,7 +35,7 @@ CarModelSelectStep.prototype._loadCarModels = function(provider) {
         modelElement.classList.add('model');
         modelElement.textContent = model;
 
-        if (model === this.values.model) {
+        if (model === this.getCarModel()) {
             this.currentModelElement = modelElement;
             this.currentModelElement.classList.add('selected');
         }
@@ -57,10 +57,7 @@ CarModelSelectStep.prototype._addDefaultListeners =  function() {
                 this.currentModelElement = target;
                 this.currentModelElement.classList.add('selected');
     
-                this.values = {
-                    ...this.values,
-                    model: target.textContent,
-                }
+                this.setCarModel(target.textContent);
             }
         }
     }); 
@@ -68,19 +65,23 @@ CarModelSelectStep.prototype._addDefaultListeners =  function() {
 
 CarModelSelectStep.prototype.synchronizeWithWizard = function(mappedValues) {
     const { brand } = mappedValues;
+    const { emptyElement } = helper;
+    
+    let provider = [];
 
     if (brand) {
-        if (this.values.model && !cars.models[brand].includes(this.values.model)) {
+        const model = this.getCarModel();
+        provider = cars.models[brand];
 
-            this.values = {
-                ...this.values,
-                model: null,
-            };
+        if (model && !provider.includes(model)) {
+
+            this.setCarModel(null);
         }
 
-        while (this.modelsContainerElement.firstChild) this.modelsContainerElement.removeChild(this.modelsContainerElement.firstChild);
-        this._loadCarModels(cars.models[brand]);
+        emptyElement(this.modelsContainerElement);
     }
+
+    this._loadCarModels(provider);
 }
 
 CarModelSelectStep.prototype.getCarModel = function() {

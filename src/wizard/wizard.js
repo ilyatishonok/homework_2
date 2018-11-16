@@ -8,7 +8,7 @@ function Wizard(element, processStep, processSummary) {
     this.values = {};
     this.stepMappings = Object.create(null);
 
-    this._reconstructDOM();
+    this.reconstructDOM();
 }
 
 Wizard.prototype.update = function(stepId) {
@@ -19,8 +19,6 @@ Wizard.prototype.update = function(stepId) {
             ...this.values,
             [stepId]: step.getValues(),
         };
-
-        console.log(this.values);
         
         this.setNextButtonAvailability(step.isJumpToNextStepAllowed());
     }
@@ -37,41 +35,63 @@ Wizard.prototype.setNextButtonAvailability = function(isAvailable) {
     }
 }
 
+Wizard.prototype.setPreviousButtonVisibility = function(stepIndex) {
+    if (stepIndex === 0 && this.isPreviousButtonVisible) {
+        this.isPreviousButtonVisible = false;
+        this.previousActionElement.style.display = 'none';
+    } else if (stepIndex !== 0 && !this.isPreviousButtonVisible) {
+        this.isPreviousButtonVisible = true;
+        this.previousActionElement.style.display = 'block';
+    }
+}
+
 Wizard.prototype.jumpToNextStep = function() {
     this.currentStep.hide();
 
     const currentStepIndex = this.steps.indexOf(this.currentStep);
-    const nextStepIndex = currentStepIndex + 1;
+    const newStepIndex = currentStepIndex + 1;
 
-    if (nextStepIndex === this.steps.length) {
+    this.updateProgressBar(newStepIndex, this.steps.length);
+
+    if (newStepIndex === this.steps.length) {
         return this.showSummary();
     }
 
-    this.currentStep = this.steps[nextStepIndex];
+    this.currentStep = this.steps[newStepIndex];
     this.stepTitleElement.textContent = this.currentStep.title;
 
     this.processMappings();
-    this.currentStep.show();
 
-    this.previousActionElement.style.display = 'block';
+    this.setPreviousButtonVisibility(newStepIndex);
     this.setNextButtonAvailability(this.currentStep.isJumpToNextStepAllowed());
-    this.progressBarElement.style.width = `${(100 * nextStepIndex)/(this.steps.length)}%`;
+
+    this.currentStep.show();
 }
 
 Wizard.prototype.showSummary = function() {
-    this.progressBarElement.parentNode.style.display = 'none';
+    this.hideBarElements();
+
+    this.summary.show(this.values);
+}
+
+Wizard.prototype.hideBarElements = function() {
+    this.progressElement.style.display = 'none';
     this.stepTitleElement.style.display = 'none';
     this.actionsElement.style.display = 'none';
-    this.summary.show(this.values);
+}
+
+Wizard.prototype.updateProgressBar = function(stepIndex, stepsLength) {
+    this.progressElement.firstChild.style.width = `${(100 * stepIndex)/(stepsLength)}%`;
 }
 
 Wizard.prototype.processMappings = function() {
     const { swallowCompare } = helper;
+    const { stepId } = this.currentStep;
 
     const newMappings = this.currentStep.mapWizardValues(this.values);
-    const mappings = this.stepMappings[this.currentStep.stepId];
+    const mappings = this.stepMappings[stepId];
     
-    this.stepMappings[this.currentStep.stepId] = newMappings;
+    this.stepMappings[stepId] = newMappings;
 
     const isEqual = swallowCompare(mappings, newMappings);
 
@@ -82,41 +102,42 @@ Wizard.prototype.processMappings = function() {
 
 Wizard.prototype.jumpToPreviousStep = function() {
     const currentStepIndex = this.steps.indexOf(this.currentStep);
-
-    if (currentStepIndex === 0) {
+    const newStepIndex = currentStepIndex - 1;
+    
+    if (newStepIndex === -1) {
         return false;
     }
 
     this.currentStep.hide();
 
-    this.currentStep = this.steps[currentStepIndex - 1];
-    const newStep = this.steps[currentStepIndex - 1];
-    
-    this.setNextButtonAvailability(newStep.isJumpToNextStepAllowed());
-    this.progressBarElement.style.width = `${100 * (currentStepIndex - 1)/this.steps.length}%`;
+    this.updateProgressBar(newStepIndex, this.steps.length);
+    this.currentStep = this.steps[newStepIndex];
     this.stepTitleElement.textContent = this.currentStep.title;
-    if (currentStepIndex - 1 === 0) {
-        this.previousActionElement.style.display = 'none';
-    }
+    
+    this.setPreviousButtonVisibility(newStepIndex);
+    this.setNextButtonAvailability(this.currentStep.isJumpToNextStepAllowed());
 
-    newStep.show();
+    this.currentStep.show();
 }
 
-Wizard.prototype._reconstructDOM = function() {
+Wizard.prototype.reconstructDOM = function() {
     const { findStepsElements, findSummaryElement, emptyElement } = helper;
 
+    const elementDisplay = this.element.style.display;
     const stepElements = findStepsElements(this.element);
     const summaryElement = findSummaryElement(this.element);
 
+    this.element.style.display = 'none';
     emptyElement(this.element);
 
     const content = document.createElement('div');
     content.classList.add('content');
 
-    this._createSteps(stepElements);
-    this._createStepTitlesDOM(this.currentStep.title);
-    this._createSummary(summaryElement);
-    this._createActionsDOM();
+    this.createSteps(stepElements);
+    this.createStepTitleDOM(this.currentStep.title);
+    this.createSummary(summaryElement);
+    this.createProgressBar();
+    this.createActionsDOM();
 
     this.setNextButtonAvailability(this.currentStep.isJumpToNextStepAllowed());
 
@@ -127,30 +148,29 @@ Wizard.prototype._reconstructDOM = function() {
     content.appendChild(this.summary.element);
 
     this.element.appendChild(this.stepTitleElement);
-    this.element.appendChild(this._createProgressBar());
+    this.element.appendChild(this.progressElement);
     this.element.appendChild(content);
     this.element.appendChild(this.actionsElement);
+
+    this.element.style.display = elementDisplay;
 }
 
-Wizard.prototype._createStepTitlesDOM = function(stepTitle) {
+Wizard.prototype.createStepTitleDOM = function(stepTitle) {
     this.stepTitleElement = document.createElement('div');
     this.stepTitleElement.classList.add('step-title');
     this.stepTitleElement.textContent = stepTitle;
 }
 
-Wizard.prototype._createActionsDOM = function() {
-    const actionsElement = document.createElement('div');
-    const nextActionElement = document.createElement('button');
-    const previousActionElement = document.createElement('button');
+Wizard.prototype.createActionsDOM = function() {
+    this.actionsElement = document.createElement('div');
+    this.nextActionElement = document.createElement('button');
+    this.previousActionElement = document.createElement('button');
 
-    nextActionElement.textContent = 'Next';
-    nextActionElement.classList.add('next-action');
-    previousActionElement.textContent = 'Previous';
-    previousActionElement.classList.add('previous-action');
-    previousActionElement.style.display = 'none';
-
-    this.nextActionElement = nextActionElement
-    this.previousActionElement = previousActionElement;
+    this.nextActionElement.textContent = 'Next';
+    this.nextActionElement.classList.add('next-action');
+    this.previousActionElement.textContent = 'Previous';
+    this.previousActionElement.classList.add('previous-action');
+    this.previousActionElement.style.display = 'none';
 
     this.nextActionElement.addEventListener('click', () => {
         if (this.currentStep.validate()) {
@@ -162,14 +182,12 @@ Wizard.prototype._createActionsDOM = function() {
         this.jumpToPreviousStep();
     });
 
-    this.actionsElement = actionsElement;
-
     this.actionsElement.classList.add('actions');
-    this.actionsElement.appendChild(previousActionElement);
-    this.actionsElement.appendChild(nextActionElement);
+    this.actionsElement.appendChild(this.previousActionElement);
+    this.actionsElement.appendChild(this.nextActionElement);
 }
 
-Wizard.prototype._createSummary = function(summaryElement) {
+Wizard.prototype.createSummary = function(summaryElement) {
     let summary = this.processSummary(summaryElement);
 
     if (!(summary instanceof Summary)) {
@@ -181,7 +199,7 @@ Wizard.prototype._createSummary = function(summaryElement) {
     this.summary = summary;
 }
 
-Wizard.prototype._createSteps = function(stepElements) {
+Wizard.prototype.createSteps = function(stepElements) {
     this.steps = [];
 
     const update = this.update.bind(this);
@@ -205,14 +223,12 @@ Wizard.prototype._createSteps = function(stepElements) {
     firstStep.show();
 }
 
-Wizard.prototype._createProgressBar = function() {
-    const progressElement = document.createElement('div');
-    progressElement.classList.add('progress');
+Wizard.prototype.createProgressBar = function() {
+    this.progressElement = document.createElement('div');
+    this.progressElement.classList.add('progress');
 
-    this.progressBarElement = document.createElement('div');
-    this.progressBarElement.classList.add('progress-bar');
+    const progressBarElement = document.createElement('div');
+    progressBarElement.classList.add('progress-bar');
 
-    progressElement.appendChild(this.progressBarElement);
-
-    return progressElement;
+    this.progressElement.appendChild(progressBarElement);
 }

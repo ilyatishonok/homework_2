@@ -18,5 +18,5 @@ const wizard = new Wizard(document.querySelector('.wizard'), (stepElement, stepI
             return new Step(stepElement, stepId, title, update);
     }
 }, element => {
-    return new Summary(element);
+    return new CarSummary(element);
 });

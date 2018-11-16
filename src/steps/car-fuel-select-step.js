@@ -4,7 +4,6 @@ function CarFuelSelectStep() {
     this.currentFuelElement = null;
     this.fuelTypesContainerElement = this.element.querySelector('.fuel-types');
     this._addDefaultListeners();
-    this._renderFuelTypes([]);
 }
 
 CarFuelSelectStep.prototype = Object.create(Step.prototype);
@@ -24,22 +23,22 @@ CarFuelSelectStep.prototype.isJumpToNextStepAllowed = function() {
 
 CarFuelSelectStep.prototype.synchronizeWithWizard = function(mappedValues) {
     const { model, brand } = mappedValues;
+    const { emptyElement } = helper;
 
     let provider = [];
 
     if (model && brand) {
+        const { fuelType } = this.values;
         provider = cars.fuelTypes[brand][model];
 
-        if (!provider.includes(this.values.fuelType)) {
+        if (fuelType && !provider.includes(fuelType)) {
             this.values = {
                 ...this.values,
                 fuelType: null,
             };
         }
 
-        while (this.fuelTypesContainerElement.firstChild) {
-            this.fuelTypesContainerElement.removeChild(this.fuelTypesContainerElement.firstChild);
-        }
+        emptyElement(this.fuelTypesContainerElement);
     }
 
     this._renderFuelTypes(provider)

@@ -26,7 +26,7 @@ Step.prototype.isJumpToNextStepAllowed = function() {
     return true;
 }
 
-Step.prototype.mapWizardValues = function(wizardValues) {
+Step.prototype.mapWizardValues = function() {
     return {};
 }
 

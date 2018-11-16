@@ -36,27 +36,10 @@ const helper = (function() {
         }
     }
 
-    const switchActiveStepTitle = (stepTitle, newStepTitle) => {
-        stepTitle.classList.remove('current');
-        newStepTitle.classList.add('current');
-    }
-
-    const getStepTitles = (stepElements, attribute) => {
-        const stepTitles = [];
-
-        stepElements.forEach(stepElement => {
-            stepTitles.push(stepElement.getAttribute(attribute));
-        });
-
-        return stepTitles;
-    }
-
     return {
         swallowCompare,
         findStepsElements,
         findSummaryElement,
         emptyElement,
-        switchActiveStepTitle,
-        getStepTitles,
     };
 })();
