@@ -1,4 +1,4 @@
-const wizard = new Wizard(document.querySelector('.wizard'), (stepElement, stepId, title, update) => {
+const processStep = (stepElement, stepId, title, update) => {
     const {
         CAR_MODEL_SELECT_STEP,
         CAR_BRAND_SELECT_STEP,
@@ -17,6 +17,10 @@ const wizard = new Wizard(document.querySelector('.wizard'), (stepElement, stepI
         default:
             return new Step(stepElement, stepId, title, update);
     }
-}, element => {
+}
+
+const processSumary = element => {
     return new CarSummary(element);
-});
+}
+
+const wizard = new Wizard(document.querySelector('.wizard'), processStep, processSumary);
