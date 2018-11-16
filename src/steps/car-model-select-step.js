@@ -7,6 +7,7 @@ function CarModelSelectStep() {
 }
 
 CarModelSelectStep.prototype = Object.create(Step.prototype);
+CarModelSelectStep.prototype.constructor = CarModelSelectStep;
 
 CarModelSelectStep.prototype.setCarModel = function(model) {
     this.values = {

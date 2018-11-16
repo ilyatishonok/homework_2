@@ -3,6 +3,7 @@ function CarSummary() {
 }
 
 CarSummary.prototype = Object.create(Summary.prototype);
+CarSummary.prototype.constructor = CarSummary;
 
 CarSummary.prototype.show = function(values) {
     const {

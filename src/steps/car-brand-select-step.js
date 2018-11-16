@@ -10,6 +10,7 @@ function CarBrandSelectStep() {
 }
 
 CarBrandSelectStep.prototype = Object.create(Step.prototype);
+CarBrandSelectStep.prototype.constructor = CarBrandSelectStep;
 
 CarBrandSelectStep.prototype.isJumpToNextStepAllowed = function() {
     return !!this.values.brand;

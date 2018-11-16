@@ -7,6 +7,7 @@ function CarFuelSelectStep() {
 }
 
 CarFuelSelectStep.prototype = Object.create(Step.prototype);
+CarFuelSelectStep.prototype.constructor = CarFuelSelectStep;
 
 CarFuelSelectStep.prototype.mapWizardValues = function(wizardValues) {
     const { CAR_BRAND_SELECT_STEP, CAR_MODEL_SELECT_STEP } = steps;
